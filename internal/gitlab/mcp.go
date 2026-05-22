@@ -146,19 +146,6 @@ func (c *Client) CallTool(ctx context.Context, name string, args map[string]any)
 	})
 }
 
-// CheckMCP verifies connectivity: it opens a session and calls
-// get_mcp_server_version, returning the raw server result.
-func CheckMCP(ctx context.Context) (string, error) {
-	c, err := NewClientFromEnv()
-	if err != nil {
-		return "", err
-	}
-	if err := c.Initialize(ctx); err != nil {
-		return "", fmt.Errorf("initialize session: %w", err)
-	}
-	res, err := c.CallTool(ctx, "get_mcp_server_version", map[string]any{})
-	if err != nil {
-		return "", fmt.Errorf("call get_mcp_server_version: %w", err)
-	}
-	return string(res), nil
-}
+// Note: connectivity verification (CheckMCP) lives in mcp_stdio.go, which uses
+// the mcp-remote OAuth transport. The HTTP client above is a reference only;
+// the GitLab MCP endpoint rejects personal access tokens.
