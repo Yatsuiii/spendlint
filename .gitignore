@@ -1,0 +1,21 @@
+# Binaries
+/spendlint
+*.exe
+
+# Local database
+*.db
+*.db-shm
+*.db-wal
+
+# Env and secrets
+.env
+.env.*
+
+# Local-only Claude context
+CLAUDE.md
+
+# OS
+.DS_Store
+
+# Go
+/vendor/
