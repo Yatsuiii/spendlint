@@ -143,6 +143,32 @@ func (c *StdioClient) Close() error {
 	return nil
 }
 
+// ListToolsRaw returns the raw tools/list result including full input schemas.
+func (c *StdioClient) ListToolsRaw() (json.RawMessage, error) {
+	return c.call("tools/list", map[string]any{})
+}
+
+// ListTools returns the names of all tools the MCP server exposes.
+func (c *StdioClient) ListTools() ([]string, error) {
+	raw, err := c.call("tools/list", map[string]any{})
+	if err != nil {
+		return nil, fmt.Errorf("tools/list: %w", err)
+	}
+	var result struct {
+		Tools []struct {
+			Name string `json:"name"`
+		} `json:"tools"`
+	}
+	if err := json.Unmarshal(raw, &result); err != nil {
+		return nil, fmt.Errorf("parse tools/list: %w", err)
+	}
+	names := make([]string, len(result.Tools))
+	for i, t := range result.Tools {
+		names[i] = t.Name
+	}
+	return names, nil
+}
+
 // CheckMCP verifies connectivity through mcp-remote: it opens a session and
 // calls get_mcp_server_version, returning the raw server result. The ctx
 // deadline should be generous enough to cover a first-run OAuth consent.
