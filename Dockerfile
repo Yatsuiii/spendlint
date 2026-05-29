@@ -12,9 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 # Pre-install mcp-remote so the first request is not slow
 RUN npm install -g mcp-remote
 COPY --from=builder /spendlint /usr/local/bin/spendlint
-# Bake in the cached mcp-remote OAuth tokens so Cloud Run can call GitLab MCP
-# without a browser consent flow.
-COPY mcp-auth /root/.mcp-auth
 
 ENV PORT=8080
 ENV SPENDLINT_DB=/data/spendlint.db

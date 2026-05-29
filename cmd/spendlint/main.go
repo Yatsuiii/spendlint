@@ -61,7 +61,6 @@ func cmdCheckMCP() *cobra.Command {
 	}
 }
 
-
 func cmdStats() *cobra.Command {
 	var db string
 	c := &cobra.Command{
@@ -210,7 +209,7 @@ func cmdReviewMR() *cobra.Command {
 }
 
 func cmdServe() *cobra.Command {
-	var db, gcpProject, gcpLocation, mcpURL, webhookSecret, port string
+	var db, gcpProject, gcpLocation, mcpURL, webhookSecret, recordToken, port string
 	c := &cobra.Command{
 		Use:   "serve",
 		Short: "Run the webhook receiver and dashboard (Phase 4)",
@@ -230,6 +229,9 @@ func cmdServe() *cobra.Command {
 			if gcpLocation == "" {
 				gcpLocation = "us-central1"
 			}
+			if recordToken == "" {
+				recordToken = os.Getenv("SPENDLINT_RECORD_TOKEN")
+			}
 
 			led, err := ledger.Open(dbPath(db))
 			if err != nil {
@@ -243,6 +245,7 @@ func cmdServe() *cobra.Command {
 				GCPLocation:   gcpLocation,
 				MCPUrl:        mcpURL,
 				WebhookSecret: webhookSecret,
+				RecordToken:   recordToken,
 				Ledger:        led,
 			})
 			addr := ":" + port
@@ -255,6 +258,7 @@ func cmdServe() *cobra.Command {
 	c.Flags().StringVar(&gcpLocation, "gcp-location", "us-central1", "Vertex AI region")
 	c.Flags().StringVar(&mcpURL, "mcp-url", "", "GitLab MCP URL (default: $GITLAB_MCP_URL or GitLab.com)")
 	c.Flags().StringVar(&webhookSecret, "webhook-secret", "", "GitLab webhook secret token (X-Gitlab-Token)")
+	c.Flags().StringVar(&recordToken, "record-token", "", "shared secret for POST /record (or $SPENDLINT_RECORD_TOKEN)")
 	c.Flags().StringVar(&port, "port", "", "HTTP port (default 8080, or $PORT)")
 	return c
 }

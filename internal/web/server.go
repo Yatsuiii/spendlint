@@ -19,19 +19,21 @@ type Config struct {
 	GCPLocation   string
 	MCPUrl        string
 	WebhookSecret string // optional; if set, X-Gitlab-Token must match
+	RecordToken   string // optional; if set, /record requires X-Spendlint-Token
 	Ledger        *ledger.Ledger
 }
 
 // Server is the HTTP server.
 type Server struct {
-	cfg    Config
-	mux    *http.ServeMux
+	cfg Config
+	mux *http.ServeMux
 }
 
 // New creates a Server and registers all routes.
 func New(cfg Config) *Server {
 	s := &Server{cfg: cfg, mux: http.NewServeMux()}
 	s.mux.HandleFunc("POST /webhook", s.handleWebhook)
+	s.mux.HandleFunc("POST /record", s.handleRecord)
 	s.mux.HandleFunc("GET /", s.handleDashboard)
 	s.mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

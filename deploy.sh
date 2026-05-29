@@ -40,6 +40,7 @@ gcloud run deploy "${SERVICE}" \
   --set-env-vars="SPENDLINT_DB=/tmp/spendlint.db" \
   --set-env-vars="GITLAB_TOKEN=${GITLAB_TOKEN}" \
   --set-env-vars="GITLAB_MCP_URL=${GITLAB_MCP_URL:-https://gitlab.com/api/v4/mcp}" \
+  --set-env-vars="SPENDLINT_RECORD_TOKEN=${SPENDLINT_RECORD_TOKEN:-}" \
   --command="spendlint" \
   --args="serve"
 

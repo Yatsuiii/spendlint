@@ -27,8 +27,12 @@ var table = map[string]Rate{
 	"gpt-4o":      {"openai", 2.50, 10.00},
 	"gpt-4o-mini": {"openai", 0.15, 0.60},
 	// Google
-	"gemini-1.5-flash": {"google", 0.075, 0.30},
-	"gemini-1.5-pro":   {"google", 1.25, 5.00},
+	"gemini-1.5-flash":      {"google", 0.075, 0.30},
+	"gemini-1.5-pro":        {"google", 1.25, 5.00},
+	"gemini-2.5-flash-lite": {"google", 0.10, 0.40},
+	"gemini-2.5-flash":      {"google", 0.30, 2.50},
+	"gemini-2.5-pro":        {"google", 1.25, 10.00},
+	"gemini-3.5-flash":      {"google", 0.075, 0.30},
 }
 
 // Lookup returns the rate for a model id. Matching is case-insensitive and
