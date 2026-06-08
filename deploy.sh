@@ -7,7 +7,8 @@ PROJECT="project-02b2181a-204b-4470-9cc"
 REGION="us-central1"
 SERVICE="spendlint"
 REPO="us-central1-docker.pkg.dev/${PROJECT}/spendlint"
-IMAGE="${REPO}/spendlint:latest"
+GIT_SHA=$(git rev-parse --short HEAD)
+IMAGE="${REPO}/spendlint:${GIT_SHA}"
 
 # Create Artifact Registry repo if it doesn't exist
 gcloud artifacts repositories create spendlint \
@@ -20,6 +21,7 @@ gcloud builds submit \
   --project="${PROJECT}" \
   --region="${REGION}" \
   --tag="${IMAGE}" \
+  --tag="${REPO}/spendlint:latest" \
   .
 
 # Deploy to Cloud Run (secrets passed as plain env vars - fine for a hackathon demo)
