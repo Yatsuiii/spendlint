@@ -4,7 +4,7 @@
 
 spendlint reviews every merge request for LLM cost impact before it ships. It reads the diff, finds LLM-touching changes, projects the dollar delta against real historical traffic, and posts a verdict comment on the MR - automatically, on every open and update.
 
-**Live demo:** https://spendlint-681081536857.us-central1.run.app
+**Live demo:** https://spendlint-m3wqnzwklq-uc.a.run.app
 
 Built for the [Google Cloud Rapid Agent hackathon](https://googlecloudmultiagents.devpost.com/) - GitLab track.
 
@@ -29,15 +29,29 @@ spendlint catches these at review time, not after the invoice.
 
 ## Example comment (posted automatically on MR open)
 
-```
-**Verdict:** WARN (+$14.23/day)
+Real output from [MR !1](https://gitlab.com/Yatsuiii/spendlint/-/merge_requests/1) — a `gemini-2.5-pro` to `gemini-2.5-flash` swap:
 
-| Call Site | Change | Baseline | Projected | Delta |
-|---|---|---|---|---|
-| summary_endpoint | model_swap | $0.45/day | $14.68/day | +$14.23/day |
+```
+**Verdict: PASS**
+This change is projected to save $0.0025/day.
+
+| Call Site | Change                            | Baseline $/day | Projected $/day | Delta    |
+| default   | gemini-2.5-pro -> gemini-2.5-flash | $0.0033        | $0.0008         | -$0.0025 |
+
+**Assumptions**
+no recorded traffic for label ""; showing unit cost (1k in / 200 out):
+$1.250/$10.000 per 1M tokens -> $0.300/$2.500 per 1M tokens
+```
+
+For a higher-traffic scenario (e.g. a `claude-haiku` to `claude-sonnet` swap at 600 calls/day):
+
+```
+**Verdict: WARN** (+$14.23/day)
+
+| Call Site        | Change                             | Baseline $/day | Projected $/day | Delta      |
+| summary_endpoint | claude-3-haiku -> claude-3-5-sonnet | $0.45          | $14.68          | +$14.23    |
 
 **Assumptions:** 600 calls/day (30-day avg), 1397 avg input tokens, 319 avg output tokens.
-Consider keeping claude-3-haiku for this path or gating the upgrade behind a feature flag.
 ```
 
 ---
@@ -138,6 +152,7 @@ Wire the webhook in GitLab: **Settings > Webhooks > Add webhook**
 | `GITLAB_MCP_URL` | GitLab MCP endpoint (default: GitLab.com) |
 | `SPENDLINT_DB` | SQLite ledger path (default: `spendlint.db`) |
 | `PORT` | HTTP port for `serve` (default: `8080`) |
+| `SPENDLINT_RECORD_TOKEN` | Shared secret for `POST /record` (set to enable ingestion) |
 
 ---
 
@@ -163,13 +178,18 @@ const response = await anthropic.messages.create({
 });
 ```
 
-Record calls to the ledger from your app:
+Record calls to the ledger from your Go app:
 
 ```go
-import "github.com/Yatsuiii/spendlint/internal/recorder"
+import "github.com/Yatsuiii/spendlint/pkg/client"
 
-rec := recorder.New(led, time.Now)
-rec.Record("summary_endpoint", "claude-3-haiku-20240307", prompt, inputTokens, outputTokens)
+c := client.New("https://your-spendlint.run.app", os.Getenv("SPENDLINT_RECORD_TOKEN"))
+c.Record(ctx, client.Call{
+    Label:        "summary_endpoint",
+    Model:        "gemini-2.5-pro",
+    InputTokens:  resp.UsageMetadata.PromptTokenCount,
+    OutputTokens: resp.UsageMetadata.CandidatesTokenCount,
+})
 ```
 
 ---
