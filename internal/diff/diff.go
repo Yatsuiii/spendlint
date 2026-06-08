@@ -54,8 +54,8 @@ type Change struct {
 // patterns that matter to cost.
 
 var (
-	// model string in code: model="...", model: "...", "model": "..."
-	reModel = regexp.MustCompile(`(?i)(?:model\s*[:=]\s*[` + "`" + `"']|"model"\s*:\s*")([a-z0-9._:/-]+)`)
+	// model string in code: model="...", model: "...", "model": "...", Go const/var *Model* identifiers
+	reModel = regexp.MustCompile(`(?i)(?:\w*[Mm]odel\w*\s*[:=]+\s*[` + "`" + `"']|"model"\s*:\s*")([a-z0-9._:/-]+)`)
 	// max_tokens / max_output_tokens integer value
 	reMaxTok = regexp.MustCompile(`(?i)max_?(?:output_?)?tokens\s*[:=]\s*(\d+)`)
 	// retry / loop / batch wrappers that multiply call volume
